@@ -1,6 +1,7 @@
 const Web3 = require('web3');
 const abi = require('./abi/panAbi');
 const mysql = require('mysql');
+const { approve } = require('./trade');
 
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -59,6 +60,8 @@ const getNewPair = async () => {
         token1 != busdAddress
       )
         continue;
+
+      await approve(token0);
 
       var ts = Math.round(new Date().getTime() / 1000);
       connection.query(
