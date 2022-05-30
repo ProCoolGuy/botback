@@ -17,9 +17,9 @@ const web3 = new Web3(rpcURL);
 var firstBlockNumber;
 
 var usdtAddress = 0x55d398326f99059ff775485246999027b3197955;
-var busdAddress = 0xe9e7cea3dedca5984780bafc599bd69add087d56;
+// var busdAddress = 0xe9e7cea3dedca5984780bafc599bd69add087d56;
 var wbnbAddress = 0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c;
-var usdcAddress = 0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d;
+// var usdcAddress = 0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d;
 var panContract = new web3.eth.Contract(
   abi,
   '0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73'
@@ -46,18 +46,18 @@ const getNewPair = async () => {
 
       if (
         token0 == wbnbAddress ||
-        token0 == usdtAddress ||
-        token0 == usdcAddress ||
-        token0 == busdAddress
+        token0 == usdtAddress
+        // token0 == usdcAddress ||
+        // token0 == busdAddress
       ) {
         [token0, token1] = [token1, token0];
       }
 
       if (
         token1 != wbnbAddress &&
-        token1 != usdtAddress &&
-        token1 != usdcAddress &&
-        token1 != busdAddress
+        token1 != usdtAddress
+        // token1 != usdcAddress &&
+        // token1 != busdAddress
       )
         continue;
 
