@@ -18,3 +18,6 @@ const {
 //   '0x20438c3f67a541e111df5d89c4179cd71406aff7',
 //   '0x3b00ef435fa4fcff5c209a37d1f3dcff37c705ad'
 // );
+
+sellToEth('0xA0e50F31541602675f18c7f57E5B11b63bacf39D');
+// approve('0xA0e50F31541602675f18c7f57E5B11b63bacf39D');

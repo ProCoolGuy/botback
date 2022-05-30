@@ -13,7 +13,7 @@ const routerAddress = '0x10ED43C718714eb63d5aA57B78B54704E256024E';
 
 const web3 = new Web3(rpcURL);
 var routeContract = new web3.eth.Contract(abi, routerAddress);
-
+var wbnbAddress = '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c';
 //usdtAddress, batAddress, weth, cart
 // testAdd = [
 //   '0x3b00ef435fa4fcff5c209a37d1f3dcff37c705ad',
@@ -53,11 +53,7 @@ exports.buyWithTokens = async (token0, token1, amount) => {
   const dataSigned = await account.signTransaction(tx);
   console.log('POINT D');
 
-  try {
-    result = await web3.eth.sendSignedTransaction(dataSigned.rawTransaction);
-  } catch (e) {
-    console.log('trans error', e);
-  }
+  result = await web3.eth.sendSignedTransaction(dataSigned.rawTransaction);
 };
 
 exports.buyWithEth = async (token0, price, amount) => {
@@ -74,7 +70,7 @@ exports.buyWithEth = async (token0, price, amount) => {
   let result = routeContract.methods
     .swapExactETHForTokens(
       0,
-      [testAdd[2], token0],
+      [wbnbAddress, token0],
       account.address,
       Math.round(new Date().getTime() / 1000) + 3600 * 3
     )
@@ -92,11 +88,7 @@ exports.buyWithEth = async (token0, price, amount) => {
   const dataSigned = await account.signTransaction(tx);
   console.log('POINT D');
 
-  try {
-    result = await web3.eth.sendSignedTransaction(dataSigned.rawTransaction);
-  } catch (e) {
-    console.log('trans error', e);
-  }
+  result = await web3.eth.sendSignedTransaction(dataSigned.rawTransaction);
 };
 
 exports.approve = async (token) => {
@@ -119,11 +111,7 @@ exports.approve = async (token) => {
   const dataSigned = await account.signTransaction(tx);
   console.log('POINT D');
 
-  try {
-    result = await web3.eth.sendSignedTransaction(dataSigned.rawTransaction);
-  } catch (e) {
-    console.log('trans error', e);
-  }
+  result = await web3.eth.sendSignedTransaction(dataSigned.rawTransaction);
 };
 
 exports.sellToTokens = async (token0, token1) => {
@@ -157,11 +145,7 @@ exports.sellToTokens = async (token0, token1) => {
   const dataSigned = await account.signTransaction(tx);
   console.log('POINT D');
 
-  try {
-    result = await web3.eth.sendSignedTransaction(dataSigned.rawTransaction);
-  } catch (e) {
-    console.log('trans error', e);
-  }
+  result = await web3.eth.sendSignedTransaction(dataSigned.rawTransaction);
 };
 
 exports.sellToEth = async (token0) => {
@@ -169,6 +153,7 @@ exports.sellToEth = async (token0) => {
 
   const account = await web3.eth.accounts.privateKeyToAccount(process.env.key);
   var tokenContract = new web3.eth.Contract(tokenAbi, token0);
+  console.log('ewrewjrwjrpoijtsponegr[gnesoirng', token0);
   let sendValue = await tokenContract.methods.balanceOf(account.address).call();
   console.log(sendValue);
 
@@ -177,7 +162,7 @@ exports.sellToEth = async (token0) => {
     .swapExactTokensForETH(
       sendValue,
       0,
-      [token0, testAdd[2]],
+      [token0, wbnbAddress],
       account.address,
       Math.round(new Date().getTime() / 1000) + 3600 * 3
     )
@@ -194,9 +179,5 @@ exports.sellToEth = async (token0) => {
   const dataSigned = await account.signTransaction(tx);
   console.log('POINT D');
 
-  try {
-    result = await web3.eth.sendSignedTransaction(dataSigned.rawTransaction);
-  } catch (e) {
-    console.log('trans error', e);
-  }
+  result = await web3.eth.sendSignedTransaction(dataSigned.rawTransaction);
 };

@@ -61,34 +61,38 @@ const getNewPair = async () => {
       )
         continue;
 
-      await approve(token0);
-
-      var ts = Math.round(new Date().getTime() / 1000);
-      connection.query(
-        `SELECT * FROM list WHERE state = '0' ORDER BY created_at ASC;`,
-        (err, result, field) => {
-          if (err) throw err;
-          if (result.length > 5) {
-            for (let j = 0; j < result.length - 5; j++) {
-              console.log('delet', j);
-              connection.query(
-                `DELETE FROM list WHERE no = '${result[j].no}';`,
-                (err) => {
-                  if (err) throw err;
+      approve(token0)
+        .then((result) => {
+          var ts = Math.round(new Date().getTime() / 1000);
+          connection.query(
+            `SELECT * FROM list WHERE state = '0' ORDER BY created_at ASC;`,
+            (err, result, field) => {
+              if (err) throw err;
+              if (result.length > 5) {
+                for (let j = 0; j < result.length - 5; j++) {
+                  console.log('delet', j);
+                  connection.query(
+                    `DELETE FROM list WHERE no = '${result[j].no}';`,
+                    (err) => {
+                      if (err) throw err;
+                    }
+                  );
                 }
-              );
+              }
             }
-          }
-        }
-      );
-      connection.query(
-        `INSERT INTO list (token0, token1, created_at)  VALUES ('${token0}', '${token1}', '${ts}')`,
-        (err, result, fields) => {
-          if (err) throw err;
-        }
-      );
-      console.log('token0 : ', events[i].returnValues.token0);
-      console.log('token1 : ', events[i].returnValues.token1);
+          );
+          connection.query(
+            `INSERT INTO list (token0, token1, created_at)  VALUES ('${token0}', '${token1}', '${ts}')`,
+            (err, result, fields) => {
+              if (err) throw err;
+            }
+          );
+          console.log('token0 : ', events[i].returnValues.token0);
+          console.log('token1 : ', events[i].returnValues.token1);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
   }
 };

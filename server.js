@@ -14,7 +14,7 @@ const {
 const app = express();
 app.use(cors());
 
-const port = 3000;
+const port = 5000;
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
@@ -24,8 +24,8 @@ const connection = mysql.createConnection({
 connection.connect();
 
 const wbnbAddress = 0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c;
-const tradingMaxLength = 10;
-var sellingPercentage = 0; //If the percentage goes down below 0
+const tradingMaxLength = 4;
+var sellingPercentage = -10; //If the percentage goes down below 0
 var sellingAge = 3600 * 3; //After 3hours
 var tradeAmount = 1; //Trading Amount
 var price = 308;
@@ -111,38 +111,43 @@ const bot = async (data) => {
   /************************************************************************************************/
   let boughtPairs = data.filter((item) => item.state === '2');
   boughtPairs.map((item, index) => {
-    if (item.priceChange['1hr'] < sellingPercentage || item.age > sellingAge) {
+    if (
+      item.priceChange['1hr'] < sellingPercentage ||
+      item.age > sellingAge ||
+      item.priceChange['5min'] < sellingPercentage
+    ) {
       connection.query(
         `UPDATE list SET state = '3', symbol = '${item.symbol}' WHERE no = '${item.no}'`
       );
 
       /****************************Sell Here********************/
       if (item.token1 == wbnbAddress)
-        sellToEth(item.toke0)
-          .then(() => {
-            connection.query(
-              `UPDATE list SET state = '4' WHERE no = '${item.no}'`
-            );
-          })
-          .catch((error) => {
-            console.log(error);
-            connection.query(
-              `UPDATE list SET state = '2' WHERE no = '${item.no}'`
-            );
-          });
+        (function (qwe) {
+          sellToEth(qwe.token0)
+            .then(() => {
+              connection.query(
+                `UPDATE list SET state = '4' WHERE no = '${qwe.no}'`
+              );
+            })
+            .catch((error) => {
+              console.log(error);
+              connection.query(`DELETE FROM list WHERE no = '${qwe.no}';`);
+            });
+        })(item);
       else
-        sellToTokens(item.token0, item.token1)
-          .then(() => {
-            connection.query(
-              `UPDATE list SET state = '4' WHERE no = '${item.no}'`
-            );
-          })
-          .catch((error) => {
-            console.log(error);
-            connection.query(
-              `UPDATE list SET state = '2' WHERE no = '${item.no}'`
-            );
-          });
+        (function (qwe) {
+          sellToTokens(qwe.token0, qwe.token1)
+            .then(() => {
+              connection.query(
+                `UPDATE list SET state = '4' WHERE no = '${qwe.no}'`
+              );
+            })
+            .catch((error) => {
+              console.log(error);
+              connection.query(`DELETE FROM list WHERE no = '${qwe.no}';`);
+            });
+        })(item);
+
       /*********************************************************/
       item.state = 3;
     }
@@ -162,35 +167,43 @@ const bot = async (data) => {
     );
     /***********************BUYING*************************************/
     if (newPairs[newPairIndex].token1 == wbnbAddress)
-      buyWithEth(newPairs[newPairIndex].token0, price, tradeAmount)
-        .then(() => {
-          connection.query(
-            `UPDATE list SET state = '2' WHERE no = '${newPairs[newPairIndex].no}'`
-          );
-        })
-        .catch((error) => {
-          console.log(error);
-          connection.query(
-            `UPDATE list SET state = '0' WHERE no = '${newPairs[newPairIndex].no}'`
-          );
-        });
+      (function (index) {
+        buyWithEth(newPairs[index].token0, price, tradeAmount)
+          .then(() => {
+            connection.query(
+              `UPDATE list SET state = '2' WHERE no = '${newPairs[index].no}'`
+            );
+          })
+          .catch((error) => {
+            console.log(
+              '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+            );
+            console.log(error);
+            connection.query(
+              `DELETE FROM list WHERE no = '${newPairs[index].no}';`
+            );
+          });
+      })(newPairIndex);
     else
-      buyWithTokens(
-        newPairs[newPairIndex].token0,
-        newPairs[newPairIndex].token1,
-        tradeAmount
-      )
-        .then(() => {
-          connection.query(
-            `UPDATE list SET state = '2' WHERE no = '${newPairs[newPairIndex].no}'`
-          );
-        })
-        .catch((error) => {
-          console.log(error);
-          connection.query(
-            `UPDATE list SET state = '0' WHERE no = '${newPairs[newPairIndex].no}'`
-          );
-        });
+      (function (index) {
+        buyWithTokens(
+          newPairs[newPairIndex].token0,
+          newPairs[newPairIndex].token1,
+          tradeAmount
+        )
+          .then(() => {
+            connection.query(
+              `UPDATE list SET state = '2' WHERE no = '${newPairs[newPairIndex].no}'`
+            );
+          })
+          .catch((error) => {
+            console.log(error);
+            connection.query(
+              `DELETE FROM list WHERE no = '${newPairs[index].no}';`
+            );
+          });
+      })(newPairIndex);
+
     /***********************END BUYING*************************************/
 
     newPairs[newPairIndex].state = 1;
