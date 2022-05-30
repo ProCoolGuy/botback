@@ -50,52 +50,58 @@ const getPrice = async () => {
 
 app.get('/getData', (req, res) => {
   try {
-    connection.query(
-      `SELECT * FROM LIST WHERE state != '4' ORDER BY NO DESC`,
-      (err, rows, fields) => {
-        result = [];
-        const getHistory = async () => {
-          let flag = [];
-          for (const index in rows) {
-            history
-              .getHistory(rows[index].token0, rows[index].token1)
-              .then((historyResult) => {
-                console.log(index);
+    connection.query(`UPDATE list SET state = '0' WHERE state = '1'`, () => {
+      connection.query(`UPDATE list SET state = '2' WHERE state = '3'`, () => {
+        connection.query(
+          `SELECT * FROM LIST WHERE state != '4' ORDER BY NO DESC`,
+          (err, rows, fields) => {
+            result = [];
+            const getHistory = async () => {
+              let flag = [];
+              for (const index in rows) {
+                history
+                  .getHistory(rows[index].token0, rows[index].token1)
+                  .then((historyResult) => {
+                    console.log(index);
 
-                var age =
-                  Math.round(new Date().getTime() / 1000) -
-                  rows[index].created_at;
+                    var age =
+                      Math.round(new Date().getTime() / 1000) -
+                      rows[index].created_at;
 
-                result[index] = {
-                  no: rows[index].no,
-                  token0: rows[index].token0,
-                  token1: rows[index].token1,
-                  ...historyResult,
-                  age: age,
-                  state: rows[index].state,
-                };
-                flag[index] = true;
-                // console.log(index, result[index]);
-                let end = true;
-                for (let i = 0; i < rows.length; i++) {
-                  if (flag[i] !== true) {
-                    end = false;
-                    break;
-                  }
-                }
-                if (end) {
-                  bot(result).then((bottingResult) => res.json(bottingResult));
-                }
-              })
-              .catch((reason) => {
-                console.log('error occurred');
-                res.json();
-              });
+                    result[index] = {
+                      no: rows[index].no,
+                      token0: rows[index].token0,
+                      token1: rows[index].token1,
+                      ...historyResult,
+                      age: age,
+                      state: rows[index].state,
+                    };
+                    flag[index] = true;
+                    // console.log(index, result[index]);
+                    let end = true;
+                    for (let i = 0; i < rows.length; i++) {
+                      if (flag[i] !== true) {
+                        end = false;
+                        break;
+                      }
+                    }
+                    if (end) {
+                      bot(result).then((bottingResult) =>
+                        res.json(bottingResult)
+                      );
+                    }
+                  })
+                  .catch((reason) => {
+                    console.log('error occurred');
+                    res.json();
+                  });
+              }
+            };
+            getHistory();
           }
-        };
-        getHistory();
-      }
-    );
+        );
+      });
+    });
   } catch (error) {
     // next(error);
   }
